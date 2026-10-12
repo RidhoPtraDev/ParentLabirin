@@ -1,202 +1,151 @@
-<div align="center">
+<p align="center">
+  <img src="https://raw.githubusercontent.com/RidhoPtraDev/ParentLabirin/main/docs/assets/logo.png" alt="Parent Labirin Logo" width="130" height="150" />
+</p>
 
-<img src="docs/assets/logo.png" alt="Parent Labirin Mascot Logo" width="160" />
+<h1 align="center">Parent Labirin</h1>
 
-# Parent Labirin
-### High-Performance 2D Maze Engine & Real-Time Host Orchestration
+<p align="center">
+  <strong>Engine Game Labirin 2D Real-Time & Pusat Orkestrasi Host Terintegrasi</strong>
+</p>
 
-[![Node.js Version](https://img.shields.io/badge/Node.js-v18%2B%20%7C%20v22%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Socket.IO](https://img.shields.io/badge/Socket.io-v4.8-010101?style=for-the-badge&logo=socketdotio&logoColor=white)](https://socket.io/)
-[![Express.js](https://img.shields.io/badge/Express.js-v5.0-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![SQLite](https://img.shields.io/badge/SQLite-Better--SQLite3-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)](#license)
-
-**A high-performance, real-time interactive 2D maze game platform with bi-directional socket state synchronization, deterministic server-side collision validation, AI pathfinding, and dedicated host control telemetry.**
-
-[Overview](#-system-overview) • [Key Features](#-enterprise-architecture--features) • [Tech Stack](#-technology-stack) • [System Architecture](#-system-architecture--data-flow) • [Quick Start](#-getting-started) • [API & Sockets](#-socketio-event-contracts) • [Security & Validation](#-anti-cheat--security-model)
-
-</div>
-
----
-
-## 📌 System Overview
-
-**Parent Labirin** is a multi-role, real-time client-server maze game designed for interactive cooperative/competitive events. Built with an **Authoritative Server Architecture**, it decouples the gameplay view from privileged administrative telemetry:
-
-* **Player Experience (`/`)**: A smooth 60 FPS HTML5 Canvas engine featuring client-side prediction, entity interpolation (LERP), directional sprite rendering, and zero knowledge of secret game elements.
-* **Host Telemetry Dashboard (`/host`)**: An operations control room giving hosts real-time observability over match states, active sessions, dynamic clues, and underlying door escape statuses (*LOLOS* vs *ZONK*), accessible seamlessly via auto-generated LAN QR codes.
+<p align="center">
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Runtime-Node.js%20v18%2B%20%2F%20v22%2B-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js"></a>
+  <a href="https://socket.io"><img src="https://img.shields.io/badge/Protocol-Socket.IO%20v4-010101?style=flat-square&logo=socketdotio&logoColor=white" alt="Socket.IO"></a>
+  <a href="https://expressjs.com"><img src="https://img.shields.io/badge/Server-Express.js%20v5-000000?style=flat-square&logo=express&logoColor=white" alt="Express"></a>
+  <a href="https://www.sqlite.org"><img src="https://img.shields.io/badge/Database-SQLite%20(better--sqlite3)-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite"></a>
+  <a href="#license"><img src="https://img.shields.io/badge/License-All%20Rights%20Reserved-blue?style=flat-square" alt="License"></a>
+</p>
 
 ---
 
-## 🚀 Enterprise Architecture & Features
+## 📌 Ikhtisar Proyek (Executive Summary)
 
-### 🎮 Client Engine & UX (Player Interface)
-* **60 FPS Hardware-Accelerated Canvas Rendering**: Custom top-down grid renderer with soft shadows, dynamic glowing borders, and rounded tile geometries.
-* **Client-Side Prediction & Reconciliation**: User movements are rendered immediately with local prediction queues and reconciled against authoritative server acknowledgments (`moveAccepted` / `moveRejected`).
-* **Linear Interpolation (LERP)**: Dynamic positioning smoothing (`0.55` for players, `0.22` for monsters) prevents tile-jumping and produces fluid character motion.
-* **Haptic Visual Feedback**: Integrated sprite shaking effects and screen border flash pulses upon wall impact or input rate-limiting.
-* **Multi-Monster Aesthetics**: 7 unique monster sprites with individualized visual identities across the 10×10 grid.
+**Parent Labirin** adalah platform permainan maze 2D real-time berbasis jaringan lokal (LAN/WebSocket) yang dirancang untuk skenario permainan interaktif antara **Pemain (Player)** dan **Pemandu Game (Host)**. 
 
-### 🛡️ Authoritative Backend & Network Layer
-* **Dual-Namespace Isolation**: Complete cryptographic segregation between `/ns-host` (privileged) and `/ns-player` (restricted public), eliminating state inspection attacks.
-* **Dynamic Breadth-First Search (BFS) AI**: Monsters calculate the shortest path towards the player in real-time, adapting chasing behaviors based on dynamic threat radii:
-  * **Stage 1 (Time > 60s)**: Passive patrol, 2-cell detection radius.
-  * **Stage 2 (60s ≥ Time > 30s)**: Active hunt, 4-cell detection radius.
-  * **Stage 3 (Time ≤ 30s)**: High alert enrage, 6-cell detection radius with enhanced movement speed.
-* **Deterministic Map Validation**: 100% cell reachability guarantee verified during server initialization through topological graph traversals.
-* **Smart Physical Network Adapter Resolution**: Automatic filtering of virtual network adapters (Hyper-V, WSL, VirtualBox, VMware) to bind the QR code to the true physical Wi-Fi/Ethernet IP.
-* **Process Lifecycle & Graceful Shutdown**: Graceful teardown of sockets, timers, and SQLite connection pools upon receiving `SIGINT`/`SIGTERM` or host shutdown signals.
-
-### 🗄️ Persistence & Auditing (SQLite Engine)
-* **Synchronous Native SQLite Binding (`better-sqlite3`)**: High-throughput, zero-latency in-process database.
-* **Full Audit Trail**: Stores completed, timed-out, and host-aborted sessions, complete with door configurations, clue coordinates, and timestamps.
+Mengusung arsitektur **Authoritative Server**, sistem memisahkan tampilan pemain dari kendali telemetri administratif. Pemain disajikan pengalaman bermain 60 FPS pada HTML5 Canvas dengan prediktor pergerakan responsif tanpa membocorkan rahasia labirin. Di sisi lain, Host dibekali **Dashboard Control Center** real-time untuk memantau status sesi, membaca lokasi petunjuk (*clues*), mengidentifikasi pintu keluar asli (*LOLOS vs ZONK*), serta mengontrol alur permainan dari laptop maupun *smartphone* via pemindaian kode QR otomatis.
 
 ---
 
-## 🛠️ Technology Stack
+## ✨ Fitur Utama (Key Features)
 
-| Domain | Technology | Description |
+### 1. 🎮 Mesin Canvas 2D Adaptif & Prediksi Klien (Client Engine)
+* **Rendering Performa Tinggi (60 FPS)**: Kanvas grafis responsif dengan pewarnaan tematik (*white & pink pastel*), bayangan dinamis, dan efek partikel cahaya pintu.
+* **Client-Side Prediction & Reconciliation**: Input pergerakan direspon instan di sisi pemain dan disinkronkan kembali terhadap validasi server (*zero-lag experience*).
+* **Linear Entity Interpolation (LERP)**: Transisi pergerakan halus (koefisien `0.55` untuk pemain dan `0.22` untuk monster) sehingga karakter meluncur mulus tanpa patah-patah antar sel grid.
+* **Umpan Balik Visual Haptik**: Efek getar (*sprite shake*) dan kedip border merah (*screen flash*) otomatis saat pemain menabrak dinding atau terkena *rate-limiting* cooldown pergerakan (200ms).
+
+### 2. 🤖 AI Pathfinding Monster Adaptif (Dynamic BFS Engine)
+* **7 Varian Monster Mandiri**: Mengitari labirin dengan identitas visual unik (Red, Pink, Red2, White Horn, Rainbow Puff, Star, Blue).
+* **Algoritma Jalur Terpendek (Shortest Path)**: Mengejar pemain secara cerdas menggunakan algoritma Breadth-First Search (BFS) dengan radius ancaman dinamis 3 fase:
+  * **Fase Awal (> 60 detik)**: Patroli santai (radius deteksi 2 grid).
+  * **Fase Menengah (60 - 30 detik)**: Pengejaran aktif (radius deteksi 4 grid).
+  * **Fase Bahaya (< 30 detik)**: Mode *enrage* kecepatan tinggi (radius deteksi 6 grid).
+* **Deteksi Tabrakan Presisi**: Memvalidasi sentuhan langsung pada satu sel dan mengeliminasi eksploitasi silang (*crossing/swapped cells*).
+
+### 3. 🛡️ Telemetri Host & Isolasi Namespace (Dual-Namespace Isolation)
+* **Keamanan Informasi Tingkat Tinggi (*Zero-Knowledge*)**:
+  * Namespace `/ns-player` hanya menerima data publik (labirin, monster, timer, dan label pintu). Status pintu rahasia (*LOLOS* atau *ZONK*) tidak pernah dikirim ke pemain untuk mencegah *inspect-element cheating*.
+  * Namespace `/ns-host` memiliki otorisasi penuh membaca data rahasia serta mengeksekusi kendali sesi (*Start Game*, *Force End*, dan *Server Graceful Shutdown*).
+* **Akses Cepat QR Code LAN**: Mendeteksi IP jaringan fisik (Wi-Fi/Ethernet) dan menghasilkan QR Code instan di dashboard agar Host dapat memandu jalannya game langsung dari HP.
+
+### 4. 🗺️ Generator Labirin Terverifikasi (Topological Map Pool)
+* Dilengkapi kumpulan map labirin tetap (*Fixed Map Pool 10x10*) yang divalidasi dengan algoritma traversi graf saat server dijalankan.
+* Menjamin 100% sel labirin selalu dapat dijangkau dan selalu ada jalur bebas hambatan menuju pintu *LOLOS*.
+
+### 5. 🗄️ Audit Sesi & Database SQLite Terintegrasi
+* Pencatatan riwayat sesi secara terstruktur menggunakan **better-sqlite3**:
+  * **Tabel `sessions`**: Waktu mulai, waktu selesai, dan hasil akhir (*Win, Lose Zonk, Lose Monster, Lose Timeout, Aborted*).
+  * **Tabel `doors_config`**: Posisi dan tipe rahasia 5 pintu keluar setiap sesi.
+  * **Tabel `clues`**: Koordinat dan petunjuk rahasia yang digenerasi per sesi.
+
+---
+
+## 🏗️ Arsitektur & Tech Stack (Architecture & Technology)
+
+Aplikasi dibangun mengacu pada standar pengembangan web modular & real-time:
+
+```
+Game Parent Labirin/
+├── server/
+│   ├── index.js               # Core Express Server, Socket.IO Namespaces, Collision & AI Loop
+│   ├── maps.js                # Fixed 10x10 Maze Layout Pool & Topological Rules
+│   ├── database.js            # Inisialisasi Database SQLite & Skema Relasional
+│   └── game.db                # File Database SQLite (Penyimpanan Audit Lokal)
+├── public/
+│   ├── host/                  # Modul Dashboard Operasional Host
+│   │   ├── index.html         # Struktur Antarmuka Host Control Center
+│   │   ├── styles.css         # Desain Modern Glassmorphism & Dark Palette
+│   │   └── host.js            # Telemetri Socket Host, Toast UI & Remote Actions
+│   └── player/                # Modul Antarmuka Pemain (Canvas Engine)
+│       ├── index.html         # Kontainer Layar Game & Pop-up Modal Status
+│       ├── styles.css         # Styling HUD & Overlay Animasi
+│       ├── game.js            # Engine Canvas 2D, LERP, Keyboard WASD & Client Prediction
+│       └── assets/            # Aset Grafis Karakter Pemain, 7 Monster, & Pintu
+├── docs/
+│   └── assets/                # Aset Dokumentasi & Logo Maskot
+├── package.json               # Konfigurasi Dependensi & Script Proyek
+└── README.md                  # Dokumentasi Teknis Sistem
+```
+
+| Komponen | Teknologi | Keterangan |
 | :--- | :--- | :--- |
-| **Runtime** | Node.js (v18+ / v22+) | High-performance asynchronous JavaScript engine |
-| **Server Framework** | Express.js v5 | Minimalist web framework serving static web assets |
-| **Networking** | Socket.IO v4 | Low-latency full-duplex WebSocket protocol with fallback |
-| **Database** | SQLite 3 (`better-sqlite3`) | Embedded C++ backed relational store |
-| **Tooling & Network** | `qrcode` | Base64 QR code generation for mobile dashboard handoff |
-| **Frontend Core** | Vanilla JavaScript (ES6+), HTML5 Canvas, CSS3 | Zero-dependency, lightweight, native DOM & Canvas rendering |
+| **Runtime Lingkungan** | Node.js (v18+ / v22+) | Mesin eksekusi JavaScript server-side berperforma tinggi |
+| **Protokol Real-Time** | Socket.IO v4.8 | Komunikasi dua arah (duplex) berbasis WebSocket dengan fallback |
+| **Web Server** | Express.js v5 | Penyedia HTTP routing & static asset file serving |
+| **Database Engine** | SQLite (`better-sqlite3`) | Relasional database embedded berbasis native binding C++ |
+| **QR Code Generator** | `qrcode` | Mengonversi URL LAN host menjadi Base64 QR Code dinamis |
+| **Game Rendering** | Vanilla HTML5 Canvas 2D | Render grafik 60 FPS bebas dependensi pustaka berat |
+| **Styling & UI** | Vanilla CSS3 (Glassmorphism) | Tampilan modern, kartu transparan, dan responsif lintas layar |
 
 ---
 
-## 📐 System Architecture & Data Flow
+## 🚀 Panduan Memulai (Getting Started)
 
-```
-                           ┌────────────────────────┐
-                           │    Host Web Client     │
-                           │     (/host /ns-host)   │
-                           └───────────┬────────────┘
-                                       │ 1. startNewGame / forceEndGame
-                                       │ 2. Telemetry (Clues, Status, Doors)
-                                       ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                   AUTHORITATIVE NODE.JS BACKEND                        │
-│                                                                        │
-│  ┌──────────────────────┐  ┌─────────────────┐  ┌───────────────────┐  │
-│  │   State Controller   │  │ BFS Pathfinding │  │ Session Manager   │  │
-│  │ (Tick, Timer, Rules) │  │  (Monster AI)   │  │ (SQLite Storage)  │  │
-│  └──────────────────────┘  └─────────────────┘  └───────────────────┘  │
-└──────────────────────────────────────┬─────────────────────────────────┘
-                                       │
-                                       │ 1. Filtered State Broadcast
-                                       │ 2. movePlayer / ACK-NACK
-                                       ▼
-                           ┌────────────────────────┐
-                           │   Player Web Client    │
-                           │   (/index.html Canvas) │
-                           └────────────────────────┘
-```
+### Prasyarat (Prerequisites)
+* **Node.js**: Versi `18.0.0` atau yang lebih baru.
+* **NPM**: Versi `9.0.0` atau bawaan Node.js.
+* Browser modern (Chrome, Edge, Firefox, Safari) yang mendukung Canvas dan WebSocket.
 
----
+### Instalasi & Setup Lokal
 
-## 📂 Project Directory Structure
-
-```text
-parent-labirin/
-├── package.json               # Node.js dependencies and lifecycle scripts
-├── package-lock.json          # Dependency lockfile
-├── .gitignore                 # Exclusion rules (node_modules, SQLite DB, local logs)
-├── README.md                  # System technical documentation
-├── server/                    # Backend source code
-│   ├── index.js               # Application entry point, game loops, socket events
-│   ├── maps.js                # Fixed maze topology database (4 x 10x10 maps)
-│   ├── database.js            # SQLite connection setup and table migration schemas
-│   └── game.db                # SQLite database (auto-generated at runtime)
-└── public/                    # Web Client Assets
-    ├── host/                  # Host Operations Control Center
-    │   ├── index.html         # Host dashboard structure
-    │   ├── styles.css         # Glassmorphism dark-mode UI
-    │   └── host.js            # Host telemetry handler & remote triggers
-    └── player/                # Player Game Interface
-        ├── index.html         # Main canvas container & status modals
-        ├── styles.css         # HUD styling & overlay transitions
-        ├── game.js            # Canvas 2D engine, LERP, prediction, WASD handler
-        └── assets/            # Static image sprites (Player, 7 Monsters, Doors)
-```
-
----
-
-## 🔒 Anti-Cheat & Security Model
-
-1. **Information Asymmetry (Zero Knowledge Proof)**:
-   * Exit doors contain statuses `lolos` (escape) or `zonk` (trap). The client payload strictly strips this field:
-   ```json
-   // Player Payload (Redacted):
-   { "label": "A", "x": 0, "y": 4, "side": "left" }
-   
-   // Host Payload (Privileged):
-   { "label": "A", "x": 0, "y": 4, "side": "left", "status": "lolos" }
-   ```
-2. **Server-Side Movement Authority**:
-   * Every step requested via `movePlayer` is validated against authoritative wall masks in `server/index.js`. Moving through walls or out of bounds returns `moveRejected` with an authoritative rollback snapshot.
-3. **Deterministic Rate Limiting**:
-   * Input rate limit of **200ms** enforced on the server preventing macro automation and speed hacking.
-
----
-
-## 📡 Socket.IO Event Contracts
-
-### Host Namespace (`/ns-host`)
-| Event | Direction | Payload | Description |
-| :--- | :--- | :--- | :--- |
-| `hostState` | Server ➔ Client | `HostStateObject` | Full unredacted state including secrets and clues |
-| `startNewGame` | Client ➔ Server | `callback(res)` | Initializes maze, resets positions, starts countdown |
-| `forceEndGame` | Client ➔ Server | `callback(res)` | Aborts active game session |
-| `server:shutdown`| Client ➔ Server | `void` | Triggers graceful application shutdown |
-
-### Player Namespace (`/ns-player`)
-| Event | Direction | Payload | Description |
-| :--- | :--- | :--- | :--- |
-| `playerState` | Server ➔ Client | `PlayerStateObject`| Sanitized state (positions, time, walls, redacted doors) |
-| `movePlayer` | Client ➔ Server | `'W'\|'A'\|'S'\|'D'` | Player requested motion vector |
-| `moveAccepted`| Server ➔ Client | `{ x, y }` | Position confirmation for local reconciliation |
-| `moveRejected`| Server ➔ Client | `{ reason, serverPos }`| Rollback coordinate packet |
-| `game:ended` | Server ➔ Client | `{ result, reason }` | Final game termination verdict |
-
----
-
-## 🚦 Getting Started
-
-### Prerequisites
-* **Node.js**: `v18.0.0` or higher
-* **NPM**: `v9.0.0` or higher
-
-### Installation & Execution
-
-1. **Clone the repository:**
+1. **Clone Repository:**
    ```bash
    git clone https://github.com/RidhoPtraDev/ParentLabirin.git
    cd ParentLabirin
    ```
 
-2. **Install project dependencies:**
+2. **Instalasi Dependensi:**
    ```bash
    npm install
    ```
 
-3. **Start the application:**
-   * Production mode:
+3. **Menjalankan Server:**
+   * **Mode Produksi**:
      ```bash
      npm start
      ```
-   * Development mode (auto-reload via nodemon):
+   * **Mode Pengembangan** (Auto-reload via nodemon):
      ```bash
      npm run dev
      ```
 
-4. **Access the Application:**
-   * **Player View**: Open [http://localhost:3000](http://localhost:3000)
-   * **Host Dashboard**: Open [http://localhost:3000/host](http://localhost:3000/host) (or scan the console QR code from any smartphone on the local network).
+4. **Akses Aplikasi:**
+   * **Layar Pemain**: Buka browser di [http://localhost:3000](http://localhost:3000)
+   * **Dashboard Host**: Buka browser di [http://localhost:3000/host](http://localhost:3000/host) (atau scan QR Code dari smartphone Anda yang terhubung pada Wi-Fi yang sama).
 
 ---
 
-## 📄 License
+## 🔒 Standar Keamanan & Reliabilitas (Security & Reliability)
 
-This project is licensed under the [ISC License](package.json).
+* **Server-Authoritative Validation**: Seluruh collision dinding dan interaksi pintu divalidasi ketat di sisi server. Klien tidak dapat memodifikasi posisi atau menembus dinding secara ilegal.
+* **Rate-Limiting Input Anti-Macro**: Cooldown 200ms diterapkan di sisi server untuk memitigasi eksekusi skrip bot/makro tombol cepat.
+* **Network Adapter Filtering**: Algoritma cerdas yang memilah adaptor fisik Wi-Fi/Ethernet asli dan mengabaikan IP internal virtual (Hyper-V, WSL, VirtualBox) sehingga koneksi QR Code selalu valid.
+* **Graceful Server Teardown**: Server menangani sinyal `SIGINT`, `SIGTERM`, dan event remote shutdown dengan memutuskan koneksi socket secara tertib, membersihkan interval timer, dan menutup database tanpa *data corruption*.
+
+---
+
+## 📄 Lisensi (License)
+
+Seluruh hak cipta dilindungi undang-undang (**All Rights Reserved**).
+
+Proyek ini merupakan perangkat lunak berhak cipta eksklusif. Dilarang keras menggandakan, menyalin, mendistribusikan ulang, atau memanfaatkan kode sumber ini untuk keperluan komersial tanpa persetujuan tertulis dari pemilik hak cipta.
