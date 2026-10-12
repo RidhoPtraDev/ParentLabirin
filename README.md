@@ -1,6 +1,9 @@
 <div align="center">
 
-# 🧭 Parent Labirin (Maze Engine & Real-Time Host Orchestration)
+<img src="docs/assets/logo.png" alt="Parent Labirin Mascot Logo" width="160" />
+
+# Parent Labirin
+### High-Performance 2D Maze Engine & Real-Time Host Orchestration
 
 [![Node.js Version](https://img.shields.io/badge/Node.js-v18%2B%20%7C%20v22%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Socket.IO](https://img.shields.io/badge/Socket.io-v4.8-010101?style=for-the-badge&logo=socketdotio&logoColor=white)](https://socket.io/)
