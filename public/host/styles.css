@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #FAFAFA;
+  color: #1A1A1A;
+  font-family: 'Outfit', sans-serif;
+  padding: 40px 20px;
+}
+
+#dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #F5D7E3;
+  padding-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(45deg, #C2185B, #880e4f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+#btn-new-game {
+  background: linear-gradient(45deg, #C2185B, #880e4f);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(194, 24, 91, 0.25);
+  min-width: 200px;
+  text-align: center;
+}
+
+#btn-new-game:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(194, 24, 91, 0.45);
+}
+
+#btn-force-end {
+  background: linear-gradient(45deg, #E53E3E, #B91C1C);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(229, 62, 62, 0.25);
+  min-width: 200px;
+  text-align: center;
+}
+
+#btn-force-end:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(229, 62, 62, 0.45);
+}
+
+#btn-shutdown-server {
+  background: linear-gradient(45deg, #4A5568, #2D3748);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(74, 85, 104, 0.25);
+  min-width: 170px;
+  text-align: center;
+}
+
+#btn-shutdown-server:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 85, 104, 0.45);
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  padding: 25px;
+  border-radius: 20px;
+}
+
+.glass {
+  background: #FFFFFF;
+  border: 1px solid #F5D7E3;
+  box-shadow: 0 4px 20px rgba(194, 24, 91, 0.08);
+}
+
+.panel h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #880e4f;
+  border-left: 4px solid #C2185B;
+  padding-left: 10px;
+}
+
+.stat-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+}
+
+.stat-box {
+  background: #FFF5F8;
+  border: 1px solid #F5D7E3;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+}
+
+.stat-box .label {
+  display: block;
+  font-size: 0.85rem;
+  color: #9e6075;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-box .value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.stat-box .value.highlight {
+  color: #C2185B;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #F5D7E3;
+}
+
+th {
+  color: #9e6075;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td {
+  color: #374151;
+}
+
+.door-lolos {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.door-zonk {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+#clues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.clue-item {
+  background: #FFF5F8;
+  border: 1px solid #F5D7E3;
+  border-radius: 12px;
+  padding: 15px;
+  color: #374151;
+}
+
+.clue-item strong {
+  color: #C2185B;
+}
+
+.qr-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.qr-panel p {
+  color: #374151;
+  margin-top: 8px;
+}
+
+#qr-container {
+  margin-top: 15px;
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+  display: inline-block;
+  box-shadow: 0 4px 20px rgba(194, 24, 91, 0.2);
+  border: 3px solid #C2185B;
+}
+
+#qr-img {
+  width: 160px;
+  height: 160px;
+  display: block;
+}

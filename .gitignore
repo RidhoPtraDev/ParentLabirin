@@ -1,0 +1,19 @@
+# Dependency directories
+node_modules/
+
+# SQLite Database & local logs
+server/game.db
+server/game.db-journal
+server/game.db-wal
+server/game.db-shm
+*.log
+
+# Environment files
+.env
+.env.local
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

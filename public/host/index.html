@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parent Labirin - Dashboard Host</title>
+  <link rel="icon" type="image/png" href="/assets/player.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="dashboard">
+    <header>
+      <h1>PARENT LABIRIN — Host Control Center</h1>
+      <div class="actions">
+        <button id="btn-new-game" onclick="startNewGame()">Mulai Game Baru</button>
+        <button id="btn-force-end" onclick="forceEndGame()">Akhiri Sesi Paksa</button>
+        <button id="btn-shutdown-server" onclick="shutdownServer()">Matikan Server</button>
+      </div>
+    </header>
+
+    <div class="main-grid">
+      <!-- Session Panel -->
+      <section class="panel glass">
+        <h2>Informasi Sesi</h2>
+        <div class="stat-group">
+          <div class="stat-box">
+            <span class="label">Sesi ID</span>
+            <span class="value" id="session-id">Tidak Ada Sesi</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Sisa Waktu</span>
+            <span class="value highlight" id="timer-val">3:00</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Status</span>
+            <span class="value" id="session-status">Idle</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Door configuration -->
+      <section class="panel glass">
+        <h2>Konfigurasi Pintu (Rahasia)</h2>
+        <table id="doors-table">
+          <thead>
+            <tr>
+              <th>Pintu</th>
+              <th>Posisi (X, Y)</th>
+              <th>Status Rahasia</th>
+            </tr>
+          </thead>
+          <tbody id="doors-body">
+            <tr><td colspan="3">Menunggu sesi permainan...</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Clues configuration -->
+      <section class="panel glass">
+        <h2>Petunjuk / Clues (Rahasia)</h2>
+        <div id="clues-list">
+          <p>Belum ada petunjuk.</p>
+        </div>
+      </section>
+
+      <!-- QR Code Access -->
+      <section class="panel glass qr-panel">
+        <h2>Akses HP Host</h2>
+        <p>Scan untuk akses cepat dari HP</p>
+        <div id="qr-container">
+          <img id="qr-img" src="" alt="Host QR Code">
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="host.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parent Labirin - Pemain</title>
+  <link rel="icon" type="image/png" href="/assets/player.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+  </div>
+
+  <div id="ui-container">
+    <div id="hud">
+      <div id="timer-box">SISA WAKTU: <span id="timer-val">3:00</span></div>
+      <div id="phase-box">Fase Deteksi: <span id="phase-val">Awal (2 Grid)</span></div>
+    </div>
+
+    <!-- Waiting Screen -->
+    <div id="waiting-screen" class="overlay active">
+      <div class="glass-panel">
+        <h1>PARENT LABIRIN</h1>
+        <p>Menunggu Game Host memulai permainan baru...</p>
+      </div>
+    </div>
+
+    <!-- Victory Popup -->
+    <div id="victory-popup" class="overlay">
+      <div class="glass-panel victory">
+        <h2>Selamat kamu berhasil lolos!</h2>
+        <p>Kamu berhasil menyelesaikan labirin!</p>
+        <button onclick="dismissPopup()">Lanjut</button>
+      </div>
+    </div>
+
+    <!-- Zonk Popup -->
+    <div id="zonk-popup" class="overlay">
+      <div class="glass-panel defeat">
+        <h2>Kamu gagal menemukan pintu</h2>
+        <p>Pintu ini adalah pintu ZONK!</p>
+        <button onclick="dismissPopup()">Lanjutkan</button>
+      </div>
+    </div>
+
+    <!-- Timeout Popup -->
+    <div id="timeout-popup" class="overlay">
+      <div class="glass-panel defeat">
+        <h2>Waktu habis!</h2>
+        <p>Anda gagal melarikan diri sebelum waktu habis.</p>
+        <button onclick="dismissPopup()">Lanjutkan</button>
+      </div>
+    </div>
+
+    <!-- Monster Defeat Popup -->
+    <div id="monster-popup" class="overlay">
+      <div class="glass-panel defeat">
+        <h2>Kalah!</h2>
+        <p>Anda tertangkap oleh monster labirin.</p>
+        <button onclick="dismissPopup()">Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
