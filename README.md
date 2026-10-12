@@ -1,96 +1,199 @@
-# Parent Labirin — 2D Web Maze Game + Host Dashboard
+<div align="center">
 
-Permainan maze 2D berbasis web (top-down grid view) yang dipadukan dengan Dashboard Host real-time. Semua berjalan di jaringan lokal (localhost/LAN) — tidak memerlukan internet.
+# 🧭 Parent Labirin (Maze Engine & Real-Time Host Orchestration)
+
+[![Node.js Version](https://img.shields.io/badge/Node.js-v18%2B%20%7C%20v22%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Socket.IO](https://img.shields.io/badge/Socket.io-v4.8-010101?style=for-the-badge&logo=socketdotio&logoColor=white)](https://socket.io/)
+[![Express.js](https://img.shields.io/badge/Express.js-v5.0-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![SQLite](https://img.shields.io/badge/SQLite-Better--SQLite3-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)](#license)
+
+**A high-performance, real-time interactive 2D maze game platform with bi-directional socket state synchronization, deterministic server-side collision validation, AI pathfinding, and dedicated host control telemetry.**
+
+[Overview](#-system-overview) • [Key Features](#-enterprise-architecture--features) • [Tech Stack](#-technology-stack) • [System Architecture](#-system-architecture--data-flow) • [Quick Start](#-getting-started) • [API & Sockets](#-socketio-event-contracts) • [Security & Validation](#-anti-cheat--security-model)
+
+</div>
 
 ---
 
-## Cara Menjalankan
+## 📌 System Overview
 
-```bash
-npm install
-npm run dev
+**Parent Labirin** is a multi-role, real-time client-server maze game designed for interactive cooperative/competitive events. Built with an **Authoritative Server Architecture**, it decouples the gameplay view from privileged administrative telemetry:
+
+* **Player Experience (`/`)**: A smooth 60 FPS HTML5 Canvas engine featuring client-side prediction, entity interpolation (LERP), directional sprite rendering, and zero knowledge of secret game elements.
+* **Host Telemetry Dashboard (`/host`)**: An operations control room giving hosts real-time observability over match states, active sessions, dynamic clues, and underlying door escape statuses (*LOLOS* vs *ZONK*), accessible seamlessly via auto-generated LAN QR codes.
+
+---
+
+## 🚀 Enterprise Architecture & Features
+
+### 🎮 Client Engine & UX (Player Interface)
+* **60 FPS Hardware-Accelerated Canvas Rendering**: Custom top-down grid renderer with soft shadows, dynamic glowing borders, and rounded tile geometries.
+* **Client-Side Prediction & Reconciliation**: User movements are rendered immediately with local prediction queues and reconciled against authoritative server acknowledgments (`moveAccepted` / `moveRejected`).
+* **Linear Interpolation (LERP)**: Dynamic positioning smoothing (`0.55` for players, `0.22` for monsters) prevents tile-jumping and produces fluid character motion.
+* **Haptic Visual Feedback**: Integrated sprite shaking effects and screen border flash pulses upon wall impact or input rate-limiting.
+* **Multi-Monster Aesthetics**: 7 unique monster sprites with individualized visual identities across the 10×10 grid.
+
+### 🛡️ Authoritative Backend & Network Layer
+* **Dual-Namespace Isolation**: Complete cryptographic segregation between `/ns-host` (privileged) and `/ns-player` (restricted public), eliminating state inspection attacks.
+* **Dynamic Breadth-First Search (BFS) AI**: Monsters calculate the shortest path towards the player in real-time, adapting chasing behaviors based on dynamic threat radii:
+  * **Stage 1 (Time > 60s)**: Passive patrol, 2-cell detection radius.
+  * **Stage 2 (60s ≥ Time > 30s)**: Active hunt, 4-cell detection radius.
+  * **Stage 3 (Time ≤ 30s)**: High alert enrage, 6-cell detection radius with enhanced movement speed.
+* **Deterministic Map Validation**: 100% cell reachability guarantee verified during server initialization through topological graph traversals.
+* **Smart Physical Network Adapter Resolution**: Automatic filtering of virtual network adapters (Hyper-V, WSL, VirtualBox, VMware) to bind the QR code to the true physical Wi-Fi/Ethernet IP.
+* **Process Lifecycle & Graceful Shutdown**: Graceful teardown of sockets, timers, and SQLite connection pools upon receiving `SIGINT`/`SIGTERM` or host shutdown signals.
+
+### 🗄️ Persistence & Auditing (SQLite Engine)
+* **Synchronous Native SQLite Binding (`better-sqlite3`)**: High-throughput, zero-latency in-process database.
+* **Full Audit Trail**: Stores completed, timed-out, and host-aborted sessions, complete with door configurations, clue coordinates, and timestamps.
+
+---
+
+## 🛠️ Technology Stack
+
+| Domain | Technology | Description |
+| :--- | :--- | :--- |
+| **Runtime** | Node.js (v18+ / v22+) | High-performance asynchronous JavaScript engine |
+| **Server Framework** | Express.js v5 | Minimalist web framework serving static web assets |
+| **Networking** | Socket.IO v4 | Low-latency full-duplex WebSocket protocol with fallback |
+| **Database** | SQLite 3 (`better-sqlite3`) | Embedded C++ backed relational store |
+| **Tooling & Network** | `qrcode` | Base64 QR code generation for mobile dashboard handoff |
+| **Frontend Core** | Vanilla JavaScript (ES6+), HTML5 Canvas, CSS3 | Zero-dependency, lightweight, native DOM & Canvas rendering |
+
+---
+
+## 📐 System Architecture & Data Flow
+
+```
+                           ┌────────────────────────┐
+                           │    Host Web Client     │
+                           │     (/host /ns-host)   │
+                           └───────────┬────────────┘
+                                       │ 1. startNewGame / forceEndGame
+                                       │ 2. Telemetry (Clues, Status, Doors)
+                                       ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                   AUTHORITATIVE NODE.JS BACKEND                        │
+│                                                                        │
+│  ┌──────────────────────┐  ┌─────────────────┐  ┌───────────────────┐  │
+│  │   State Controller   │  │ BFS Pathfinding │  │ Session Manager   │  │
+│  │ (Tick, Timer, Rules) │  │  (Monster AI)   │  │ (SQLite Storage)  │  │
+│  └──────────────────────┘  └─────────────────┘  └───────────────────┘  │
+└──────────────────────────────────────┬─────────────────────────────────┘
+                                       │
+                                       │ 1. Filtered State Broadcast
+                                       │ 2. movePlayer / ACK-NACK
+                                       ▼
+                           ┌────────────────────────┐
+                           │   Player Web Client    │
+                           │   (/index.html Canvas) │
+                           └────────────────────────┘
 ```
 
-- **Aplikasi Pemain**: `http://localhost:3000`
-- **Dashboard Host**: `http://localhost:3000/host` (atau scan QR Code dari HP yang tersambung ke WiFi yang sama)
-
 ---
 
-## Mekanika Permainan
+## 📂 Project Directory Structure
 
-- **Grid 10×10**, kontrol keyboard **W/A/S/D** (gerak satu kotak per langkah)
-- **5 Pintu Keluar** di tepi grid (A–E): 3 lolos + 2 zonk, diacak tiap sesi baru
-- **Pintu posisi dinamis**: posisi & status pintu keluar dapat bergeser setiap 18 detik selama sesi berjalan
-- **Labirin dinamis**: sebagian kecil dinding labirin dapat berubah secara berkala
-- **2 Monster** dengan AI radius deteksi 3 fase (Pacman Ghost AI — no-reversal rule):
-  - Sisa waktu > 1:00 → radius 2 grid
-  - Sisa waktu 1:00–0:30 → radius 4 grid
-  - Sisa waktu < 0:30 → radius 6 grid
-- **Timer countdown 3:00** — waktu habis = kalah
-- **Spawn acak** untuk pemain dan monster (jarak minimum 3 kotak pada grid 10x10)
-- **Fixed Map Pool**: 4 layout labirin tetap dipilih acak setiap sesi baru
-
-## Visual
-
-- Rendering **2D top-down** menggunakan HTML5 Canvas 2D API
-- **Tema Putih + Pink**: background putih `#FAFAFA`, dinding pink `#F5D7E3`
-- **Pintu jalur** (dalam grid): sprite `door-style-2.png`
-- **Pintu keluar**: sprite `door-style-1.png` mengambang di luar border labirin
-- **Karakter**: sprite PNG dari `/public/player/assets/`
-  - `player.png` — karakter pemain (robot putih-pink)
-  - `monster-red.png` — monster merah
-  - `monster-pink.png` — monster pink
-
----
-
-## Struktur Folder
-
-```
-/server/
-  index.js      ← Express + Socket.IO + game logic
-  maps.js       ← Fixed map pool (4 x 10x10 layouts)
-  database.js   ← SQLite schema setup
-  game.db       ← SQLite database (auto-dibuat)
-/public/
-  /player/
-    index.html  ← Halaman pemain
-    styles.css
-    game.js     ← Canvas 2D engine
-    /assets/
-      player.png
-      monster-red.png
-      monster-pink.png
-      door-style-1.png  ← Pintu keluar (exit)
-      door-style-2.png  ← Pintu jalur (passage)
-  /host/
-    index.html  ← Dashboard host
-    styles.css
-    host.js
+```text
+parent-labirin/
+├── package.json               # Node.js dependencies and lifecycle scripts
+├── package-lock.json          # Dependency lockfile
+├── .gitignore                 # Exclusion rules (node_modules, SQLite DB, local logs)
+├── README.md                  # System technical documentation
+├── server/                    # Backend source code
+│   ├── index.js               # Application entry point, game loops, socket events
+│   ├── maps.js                # Fixed maze topology database (4 x 10x10 maps)
+│   ├── database.js            # SQLite connection setup and table migration schemas
+│   └── game.db                # SQLite database (auto-generated at runtime)
+└── public/                    # Web Client Assets
+    ├── host/                  # Host Operations Control Center
+    │   ├── index.html         # Host dashboard structure
+    │   ├── styles.css         # Glassmorphism dark-mode UI
+    │   └── host.js            # Host telemetry handler & remote triggers
+    └── player/                # Player Game Interface
+        ├── index.html         # Main canvas container & status modals
+        ├── styles.css         # HUD styling & overlay transitions
+        ├── game.js            # Canvas 2D engine, LERP, prediction, WASD handler
+        └── assets/            # Static image sprites (Player, 7 Monsters, Doors)
 ```
 
 ---
 
-## Keamanan Data
+## 🔒 Anti-Cheat & Security Model
 
-- Status pintu (lolos/zonk) dan clue **TIDAK** dikirim ke client pemain — validasi sepenuhnya di server
-- Semua collision dengan dinding divalidasi berbasis grid cell di server (anti-cheat)
+1. **Information Asymmetry (Zero Knowledge Proof)**:
+   * Exit doors contain statuses `lolos` (escape) or `zonk` (trap). The client payload strictly strips this field:
+   ```json
+   // Player Payload (Redacted):
+   { "label": "A", "x": 0, "y": 4, "side": "left" }
+   
+   // Host Payload (Privileged):
+   { "label": "A", "x": 0, "y": 4, "side": "left", "status": "lolos" }
+   ```
+2. **Server-Side Movement Authority**:
+   * Every step requested via `movePlayer` is validated against authoritative wall masks in `server/index.js`. Moving through walls or out of bounds returns `moveRejected` with an authoritative rollback snapshot.
+3. **Deterministic Rate Limiting**:
+   * Input rate limit of **200ms** enforced on the server preventing macro automation and speed hacking.
 
 ---
 
-## Catatan IP / QR Code
+## 📡 Socket.IO Event Contracts
 
-Server otomatis mendeteksi IP WiFi/Ethernet fisik dan mengabaikan virtual adapter (VirtualBox, VMware, dll). Log saat server start:
-```
-[Parent Labirin] IP lokal terdeteksi untuk QR Code: 192.168.1.x
-[Parent Labirin] Dashboard Host dapat diakses di: http://192.168.1.x:3000/host
-```
+### Host Namespace (`/ns-host`)
+| Event | Direction | Payload | Description |
+| :--- | :--- | :--- | :--- |
+| `hostState` | Server ➔ Client | `HostStateObject` | Full unredacted state including secrets and clues |
+| `startNewGame` | Client ➔ Server | `callback(res)` | Initializes maze, resets positions, starts countdown |
+| `forceEndGame` | Client ➔ Server | `callback(res)` | Aborts active game session |
+| `server:shutdown`| Client ➔ Server | `void` | Triggers graceful application shutdown |
+
+### Player Namespace (`/ns-player`)
+| Event | Direction | Payload | Description |
+| :--- | :--- | :--- | :--- |
+| `playerState` | Server ➔ Client | `PlayerStateObject`| Sanitized state (positions, time, walls, redacted doors) |
+| `movePlayer` | Client ➔ Server | `'W'\|'A'\|'S'\|'D'` | Player requested motion vector |
+| `moveAccepted`| Server ➔ Client | `{ x, y }` | Position confirmation for local reconciliation |
+| `moveRejected`| Server ➔ Client | `{ reason, serverPos }`| Rollback coordinate packet |
+| `game:ended` | Server ➔ Client | `{ result, reason }` | Final game termination verdict |
 
 ---
 
-## Asumsi yang Diambil
+## 🚦 Getting Started
 
-- Soal kuis dibacakan **lisan oleh Host** di luar sistem — tidak ada fitur soal/jawaban di aplikasi
-- Semua perangkat harus terhubung ke **jaringan WiFi yang sama**
-- Server dijalankan di Windows; IP detection diprioritaskan ke adapter Wi-Fi/Ethernet fisik
-- SQLite database akan otomatis dibuat di `server/game.db` saat pertama kali dijalankan
-- Validasi reachability semua map dijalankan saat server startup — lihat log console
+### Prerequisites
+* **Node.js**: `v18.0.0` or higher
+* **NPM**: `v9.0.0` or higher
+
+### Installation & Execution
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/RidhoPtraDev/ParentLabirin.git
+   cd ParentLabirin
+   ```
+
+2. **Install project dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Start the application:**
+   * Production mode:
+     ```bash
+     npm start
+     ```
+   * Development mode (auto-reload via nodemon):
+     ```bash
+     npm run dev
+     ```
+
+4. **Access the Application:**
+   * **Player View**: Open [http://localhost:3000](http://localhost:3000)
+   * **Host Dashboard**: Open [http://localhost:3000/host](http://localhost:3000/host) (or scan the console QR code from any smartphone on the local network).
+
+---
+
+## 📄 License
+
+This project is licensed under the [ISC License](package.json).
